@@ -1,8 +1,8 @@
 int GetEtaPrime()
 {
-    const double minPt = 3;
-    const double maxPt = 7;
-    const double integralMin = 1.2;
+    const double minPt = 0;
+    const double maxPt = 20;
+    const double integralMin = 1.3;
     const double integralMax = 1.5;
     const double rangeMin = 0.8;
     const double rangeMax = 1.2;
@@ -11,10 +11,12 @@ int GetEtaPrime()
     TFile *outfile = new TFile("temp/EtaPrimeOut.root", "recreate");
 
     std::stringstream histName;
-    std::array<std::string, 4> dirs = { "c0-1_z0-2_r00",
-                                        "c2-3_z0-2_r00",
-                                        "c4-5_z0-2_r00",
-                                        "c6-9_z0-2_r00" };
+    //std::array<std::string, 4> dirs = { "c0-1_z0-2_r00",
+                                        //"c2-3_z0-2_r00",
+                                        //"c4-5_z0-2_r00",
+                                        //"c6-9_z0-2_r00" };
+    
+   std::array<std::string, 1> dirs = {"c6-8_z0-2_r00" };
     
     for (auto &dir : dirs)
     {
@@ -22,14 +24,10 @@ int GetEtaPrime()
         {
             histName << "MassPtPID" << pid + 1 << "_FG12";
             TH2D *massPtFG = infile->Get<TDirectory>(dir.c_str())->Get<TH2D>(histName.str().c_str());
-            //histName << dir;
-            //massPtFG->SetName(histName.str().c_str());
             histName.str("");
             
             histName << "MassPtPID" << pid + 1 << "_BG12";
             TH2D *massPtBG = infile->Get<TDirectory>(dir.c_str())->Get<TH2D>(histName.str().c_str());
-            //histName << dir;
-            //massPtBG->SetName(histName.str().c_str());
             histName.str("");
 
             const double minPtBin = massPtFG->GetYaxis()->FindBin(minPt);
@@ -46,8 +44,8 @@ int GetEtaPrime()
             TH1D *bgProj = massPtBG->ProjectionX(histName.str().c_str(), minPtBin, maxPtBin);
             histName.str("");
             
-            fgProj->GetXaxis()->SetRangeUser(rangeMin, rangeMax);
-            bgProj->GetXaxis()->SetRangeUser(rangeMin, rangeMax);
+            //fgProj->GetXaxis()->SetRangeUser(rangeMin, rangeMax);
+            //bgProj->GetXaxis()->SetRangeUser(rangeMin, rangeMax);
 
             const double fgIntegral = fgProj->Integral(integralMinBin, integralMaxBin);
             const double bgIntegral = bgProj->Integral(integralMinBin, integralMaxBin);
