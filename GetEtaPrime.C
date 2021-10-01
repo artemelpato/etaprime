@@ -1,9 +1,9 @@
 int GetEtaPrime()
 {
-    const double minPt = 0;
-    const double maxPt = 20;
-    const double integralMin = 1.3;
-    const double integralMax = 1.5;
+    const double minPt = 3;
+    const double maxPt = 4;
+    const double integralMin = 1.;
+    const double integralMax = 1.1;
     const double rangeMin = 0.8;
     const double rangeMax = 1.2;
 
@@ -11,12 +11,7 @@ int GetEtaPrime()
     TFile *outfile = new TFile("temp/EtaPrimeOut.root", "recreate");
 
     std::stringstream histName;
-    //std::array<std::string, 4> dirs = { "c0-1_z0-2_r00",
-                                        //"c2-3_z0-2_r00",
-                                        //"c4-5_z0-2_r00",
-                                        //"c6-9_z0-2_r00" };
-    
-   std::array<std::string, 1> dirs = {"c6-8_z0-2_r00" };
+    std::vector<std::string> dirs = { "c6-9_z0-2_r00" };
     
     for (auto &dir : dirs)
     {

@@ -17,14 +17,14 @@ cent1=$1
 cent2=$2
 pt1=$3
 pt2=$4
-integral_min=1.1
-integral_max=1.3
-
+integral_min=0.7
+integral_max=0.91
+ 
 [ -e temp/CombinedSignals.root ] && rm -f temp/CombinedSignals.root
 
 root -l -b -q "GetSignals.C($pt1, $pt2, $integral_min, $integral_max)"
-root -l -b -q "CombineSignals.C($cent1, $cent2, 0, 2)"
+root -l -q "CombineSignals3.C($cent1, $cent2, 0, 2)"
 
-echo "DONE"
+echo "=======================DONE====================="
 
-root -e 'new TBrowser'
+root -l -e 'new TBrowser'

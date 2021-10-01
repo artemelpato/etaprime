@@ -1,0 +1,10 @@
+se-374428.root    in total 1 bad sectors: 0 0 0 0 0 0 0 1 
+se-374733.root    in total 1 bad sectors: 0 0 0 0 1 0 0 0 
+se-376433.root    in total 2 bad sectors: 0 0 0 0 1 1 0 0 
+se-376434.root    in total 2 bad sectors: 0 0 0 0 1 1 0 0 
+se-376435.root    in total 2 bad sectors: 0 0 0 0 1 1 0 0 
+se-376579.root    in total 1 bad sectors: 0 0 0 0 0 1 0 0 
+se-376620.root    in total 2 bad sectors: 0 0 0 0 1 1 0 0 
+se-377167.root    in total 1 bad sectors: 0 0 0 0 0 0 1 0 
+se-377171.root    in total 1 bad sectors: 0 0 0 0 0 0 1 0 
+se-377177.root    in total 1 bad sectors: 0 0 0 0 0 1 0 0 

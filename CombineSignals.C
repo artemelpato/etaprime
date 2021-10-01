@@ -1,3 +1,9 @@
+#include <TH1.h>
+#include <TH2.h>
+#include <TFile.h>
+#include <iostream>
+#include <sstream>
+
 int CombineSignals( int firstCent, 
                       int lastCent, 
                       int firstBBC, 
@@ -17,32 +23,48 @@ int CombineSignals( int firstCent,
     histosNames.push_back("PeakHist_PID2_cut");    
     histosNames.push_back("PeakHist_PID3_cut");    
 
-    std::string fullHistName;
-
     char name[50];
 
-    for (int iCent = firstCent; iCent < lastCent; iCent++) {
-        for (int iBBC = firstBBC; iBBC < lastBBC; iBBC++) {
-            
-            sprintf(name, "c0%d_z0%d_r00/", iCent, iBBC);
+    for (int iCent = firstCent; iCent < lastCent; iCent++) 
+    {
+        for (int iBBC = firstBBC; iBBC < lastBBC; iBBC++) 
+        {
+            std::basic_stringstream<char> dir;
+            dir << "c" << iCent << "_z" << iBBC << "_r00";
 
-            if (iCent == firstCent && iBBC == firstBBC) {
-
-                for (int i = 0; i < histosNames.size(); i++) {
-
-                    fullHistName = name + histosNames[i];
-                    histos.push_back( (TH1D*) infile->Get( fullHistName.c_str() ) );
-
-                    if (!histos[i]) {
-                        cerr << "!!! An error occured while opening " << fullHistName << " !!!" <<  endl;
+            if (iCent == firstCent && iBBC == firstBBC) 
+            {
+                for (int i = 0; i < histosNames.size(); i++) 
+                {
+                    if (infile->FindObjectAny(dir.str().c_str()))
+                    {
+                        TH1D *hist = infile->Get<TDirectory>(dir.str().c_str())->Get<TH1D>( histosNames[i].c_str() );
+                        std::cout
                     }
+
+                    if (!hist)
+                    {
+                        std::cout << "Error with hist " << histosNames[i] << std::endl;
+                        continue;
+                    }
+
+                    histos.push_back(hist);
                 }
+            } 
 
-            } else {
-                for (int i = 0; i < histosNames.size(); i++) {
+            else 
+            {
+                for (int i = 0; i < histosNames.size(); i++) 
+                {
+                    TH1D *hist = infile->Get<TDirectory>(dir.str().c_str())->Get<TH1D>( histosNames[i].c_str() );
+                    
+                    if (!hist)
+                    {
+                        std::cout << "Not adding hist " << histosNames[i] << std::endl;
+                        continue;
+                    } 
 
-                    fullHistName = name + histosNames[i];
-                    histos[i]->Add(  (TH1D*) infile->Get( fullHistName.c_str() ), 1 );
+                    histos[i]->Add(hist);
                 }
             }
         }
@@ -50,10 +72,14 @@ int CombineSignals( int firstCent,
 
     sprintf(name, "c%d-%d_z%d-%d_r00", firstCent, lastCent, firstBBC, lastBBC);
 
-    outfile->mkdir(name);
+    if (!outfile->FindObjectAny(name)) 
+    {
+        outfile->mkdir(name);
+    }
     outfile->cd(name);
                 
-    for (int i = 0; i < histosNames.size(); i++) {
+    for (int i = 0; i < histosNames.size(); i++) 
+    {
         histos[i]->Write();
     }
 

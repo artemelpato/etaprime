@@ -1,3 +1,11 @@
+#include <iostream>
+#include <TH1.h>
+#include <TH2.h>
+#include <TFile.h>
+#include <sstream>
+#include <vector>
+#include <string>
+
 int GetSignals(const double minPt,
                const double maxPt,
                const double integralMin,
@@ -7,11 +15,8 @@ int GetSignals(const double minPt,
     const int nCents    = 10;
     const int nVertexes = 3;
 
-    TFile *infile  = new TFile("cabanaboy-runs2/cabanaboy-merged.root",    "read");
+    TFile *infile  = new TFile("cabanaboy-runs3/cabanaboy-merged.root",    "read");
     TFile *outfile = new TFile("temp/Signals.root", "recreate");
-
-    std::stringstream dir;
-    std::stringstream histName;
     
     for (int iCent = 0; iCent < nCents; iCent++)
     {
@@ -19,6 +24,10 @@ int GetSignals(const double minPt,
         {
             for (int pid = 0; pid < 3; pid++) 
             {
+                std::stringstream dir;
+                std::stringstream histName;
+
+                dir.str("");     
                 dir << "c0" << iCent << "_z0" << iVertex << "_r00";
                 
                 histName << "MassPtPID" << pid + 1 << "_FG12";
@@ -61,30 +70,57 @@ int GetSignals(const double minPt,
                 
                 const double fgIntegral = fgProj->Integral(integralMinBin, integralMaxBin);
                 const double bgIntegral = bgProj->Integral(integralMinBin, integralMaxBin);
-                
                 const double scaling = fgIntegral / bgIntegral;
 
-                bgProj->Scale(scaling);
-                
+                const double fgIntegral_cut = fgProj_cut->Integral(integralMinBin, integralMaxBin);
+                const double bgIntegral_cut = bgProj_cut->Integral(integralMinBin, integralMaxBin);
+                const double scaling_cut = fgIntegral_cut / bgIntegral_cut;
+
                 histName << "PeakHist_PID" << pid + 1;
-                TH1D *peakHist = (TH1D*)fgProj->Clone(histName.str().c_str());
+                TH1D *peakHist     = (TH1D*)fgProj->Clone(histName.str().c_str());
                 histName.str("");
-                peakHist->Add(bgProj, -1);
 
                 histName << "PeakHist_PID" << pid + 1 << "_cut";
                 TH1D *peakHist_cut = (TH1D*)fgProj_cut->Clone(histName.str().c_str());
                 histName.str("");
-                peakHist_cut->Add(bgProj_cut, -1);
+
+                if (fgIntegral && bgIntegral) 
+                {
+                    bgProj->Scale(scaling);
+                    peakHist->Add(bgProj, -1);
+                }
+                else 
+                {
+                    std::cout << "Bad scaling at PID" << pid + 1 << " -- " << scaling <<  "   at dir " << dir.str().c_str() << std::endl;
+                    peakHist->Reset();
+                }
                 
-                outfile->mkdir(dir.str().c_str());
+
+                if (fgIntegral_cut && bgIntegral_cut) 
+                {
+                    bgProj_cut->Scale(scaling_cut);
+                    peakHist_cut->Add(bgProj_cut, -1);
+                }
+                else 
+                {
+                    std::cout << "Bad scaling at PID" << pid + 1 << "_cut -- " << scaling_cut << "   at dir " << dir.str().c_str() << std::endl;
+                    peakHist_cut->Reset();
+                }
+
+
+                if (!outfile->FindObjectAny(dir.str().c_str()))
+                {
+                    outfile->mkdir(dir.str().c_str());
+                }
+
                 outfile->cd(dir.str().c_str());
+
                 
                 peakHist->Write(); 
                 peakHist_cut->Write(); 
                 
                 outfile->cd();
                     
-                dir.str("");     
             }
         }
     }
