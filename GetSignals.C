@@ -7,13 +7,14 @@
 #include <string>
 
 int GetSignals(const double minPt,
-               const double maxPt,
-               const double integralMin,
-               const double integralMax)
+               const double maxPt)
 {
 
     const int nCents    = 10;
     const int nVertexes = 3;
+    const double scalingFactor = 0.96;
+    const double integralMin = 0.98;
+    const double integralMax = 1.1;
 
     TFile *infile  = new TFile("cabanaboy-runs3/cabanaboy-merged.root",    "read");
     TFile *outfile = new TFile("temp/Signals.root", "recreate");
@@ -70,11 +71,11 @@ int GetSignals(const double minPt,
                 
                 const double fgIntegral = fgProj->Integral(integralMinBin, integralMaxBin);
                 const double bgIntegral = bgProj->Integral(integralMinBin, integralMaxBin);
-                const double scaling = fgIntegral / bgIntegral;
+                const double scaling = fgIntegral / bgIntegral * scalingFactor;
 
                 const double fgIntegral_cut = fgProj_cut->Integral(integralMinBin, integralMaxBin);
                 const double bgIntegral_cut = bgProj_cut->Integral(integralMinBin, integralMaxBin);
-                const double scaling_cut = fgIntegral_cut / bgIntegral_cut;
+                const double scaling_cut = fgIntegral_cut / bgIntegral_cut * scalingFactor;
 
                 histName << "PeakHist_PID" << pid + 1;
                 TH1D *peakHist     = (TH1D*)fgProj->Clone(histName.str().c_str());

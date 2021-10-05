@@ -78,5 +78,5 @@ int CombineSignals3( int firstCent,
     
     outfile->Close();
 
-    return 1;
+    return 0;
 }
