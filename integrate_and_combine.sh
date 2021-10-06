@@ -18,12 +18,12 @@ cent2=$2
 pt1=$3
 pt2=$4
 merged_file=cabanaboy-runs3/cabanaboy-merged.root
-signals_file=temp/Signals2.root
-outfile=temp/CombinedSignals2.root
+signals_file=temp/Signals.root
+outfile=temp/CombinedSignals.root
  
-[ -e temp/CombinedSignals.root ] && rm -f temp/CombinedSignals.root
+[ -e $outfile ] && rm -f $outfile
 
-root -l -b -q "GetSignals2.C($pt1, $pt2, \"$merged_file\", \"$signals_file\")" &&
-root -l -b -q "CombineSignals3.C($cent1, $cent2, 0, 2)"
+root -l -b -q "GetSignalsForAllPt.C($pt1, $pt2, \"$merged_file\", \"$signals_file\")" &&
+root -l -b -q "CombineSignalsNew.C($cent1, $cent2, 0, 2, \"$signals_file\", \"$outfile\")"
 
 echo "=======================DONE====================="
