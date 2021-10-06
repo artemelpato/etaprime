@@ -57,32 +57,45 @@ void GetSignals2(const double pt_min,
                     const int integral_min_bin = bg_hist->GetXaxis()->FindBin(integral_min);
                     const int integral_max_bin = bg_hist->GetXaxis()->FindBin(integral_max);
 
-                    strcat(fg_hist_name, "_proj"); 
-                    strcat(bg_hist_name, "_proj"); 
+                    TH1D *total_peak_hist = fg_hist->ProjectionX(peak_hist_name);
+                    total_peak_hist->Reset();
 
-                    TH1D *fg_hist_proj = fg_hist->ProjectionX(fg_hist_name, pt_min_bin, pt_max_bin);
-                    TH1D *bg_hist_proj = bg_hist->ProjectionX(bg_hist_name, pt_min_bin, pt_max_bin);
+                    
+                    for (int pt_bin = pt_min_bin; pt_bin < pt_max_bin; ++pt_bin)
+                    {
+                        char fg_hist_proj_name[100];
+                        char bg_hist_proj_name[100];
+
+                        sprintf(fg_hist_proj_name, "%s_pt%d", fg_hist_name, pt_bin);
+                        sprintf(bg_hist_proj_name, "%s_pt%d", bg_hist_name, pt_bin);
+
+                        TH1D *fg_hist_proj = fg_hist->ProjectionX(fg_hist_proj_name, pt_bin, pt_bin);
+                        TH1D *bg_hist_proj = bg_hist->ProjectionX(fg_hist_proj_name, pt_bin, pt_bin);
+
+                        const double fg_integral = fg_hist_proj->Integral(integral_min_bin, integral_max_bin);
+                        const double bg_integral = bg_hist_proj->Integral(integral_min_bin, integral_max_bin);
+
+                        const double substracion_constant = fg_integral / bg_integral * substraction_scaling;
+
+                        if (fg_integral != 0 && bg_integral != 0)
+                        {
+                            bg_hist_proj->Scale(substracion_constant); 
+                            fg_hist_proj->Add(bg_hist_proj, -1);
+                        }
+                        else
+                        {
+                            printf("Bad Scaling at %s in %s: substracion_constant = %10.5f\n", peak_hist_name, dirname, substracion_constant);
+                            fg_hist_proj->Reset();
+                        }
+
+                        total_peak_hist->Add(fg_hist_proj);
+
+                        //delete fg_hist_proj;
+                        //delete bg_hist_proj;
+                    }
 
                     delete fg_hist;
                     delete bg_hist;
-
-                    TH1D *peak_hist = (TH1D*) fg_hist_proj->Clone(peak_hist_name);
-
-                    const double fg_integral = fg_hist_proj->Integral(integral_min_bin, integral_max_bin);
-                    const double bg_integral = bg_hist_proj->Integral(integral_min_bin, integral_max_bin);
-
-                    const double substracion_constant = fg_integral / bg_integral * substraction_scaling;
-
-                    if (fg_integral != 0 && bg_integral != 0)
-                    {
-                        bg_hist_proj->Scale(substracion_constant); 
-                        peak_hist->Add(bg_hist_proj, -1);
-                    }
-                    else
-                    {
-                        printf("Bad Scaling at %s in %s: substracion_constant = %10.5f\n", peak_hist_name, dirname, substracion_constant);
-                        peak_hist->Reset();
-                    }
 
                     if (!outfile->FindObjectAny(dirname))
                     {
@@ -90,12 +103,10 @@ void GetSignals2(const double pt_min,
                     }
 
                     outfile->cd(dirname);
-                    peak_hist->Write();
+                    total_peak_hist->Write();
                     outfile->cd();
 
-                    delete fg_hist_proj;
-                    delete bg_hist_proj;
-                    delete peak_hist;
+                    delete total_peak_hist;
 
                 }
             }
